@@ -19,6 +19,7 @@ def main():
 
     answer = responce["choices"][0]["message"]["content"]
     print(answer)
+    print(responce)
 
 if __name__ == '__main__':
     main()
