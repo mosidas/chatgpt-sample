@@ -8,25 +8,25 @@ prompt = """
 """
 
 def create_image_from_text(text):
-    # api key の設定
+    # api key setting
     openai.api_key = settings.api_key
 
-    # 応答設定
+    # send prompt
     response = openai.Image.create(
-        # プロンプト
+        # prompt
         prompt = text,
-        # 何枚の画像を生成するか  1〜10
+        # images number (1-10)
         n = 1,
-        # 画像サイズ 256x256、512x512、1024x1024
+        # image size 256x256、512x512、1024x1024
         size = '512x512',
-        # API応答のフォーマット url b64_json
+        # url b64_json
         response_format = 'url'
         )
 
-    # API応答から画像URLを指定
+    # get image url
     image_url = response['data'][0]['url']
 
-    # 画像をローカルに保存
+    # save image to current directory
     dt_now = datetime.datetime.now()
     image_data = requests.get(image_url).content
     with open(f"chatgpt_image_{dt_now.strftime('%Y-%m-%d-%H-%M-%S')}.jpg", "wb") as f:
