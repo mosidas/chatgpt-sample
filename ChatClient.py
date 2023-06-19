@@ -27,7 +27,8 @@ class ChatClient:
         if message.get("function_call"):
             func_name = message["function_call"]["name"]
             arguments = json.loads(message["function_call"]["arguments"])
-            function_response = function_calling.get_my_profile(arguments.get("item"))
+            func = getattr(function_calling, func_name)
+            function_response = func(arguments.get("item"))
 
             self.past_messages.append({
                 "role": "function",
