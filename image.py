@@ -1,5 +1,5 @@
 import openai
-import settings
+import os
 import requests
 import datetime
 
@@ -9,7 +9,7 @@ prompt = """
 
 def create_image_from_text(text):
     # api key setting
-    openai.api_key = settings.api_key
+    openai.api_key = os.environ["OPENAI_API_KEY"]
 
     # send prompt
     response = openai.Image.create(

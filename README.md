@@ -1,8 +1,9 @@
 # chatgpt_sample
 
+- Windows
 ```powershell
-python -m venv chatgpt_sample
-activate
+python -m venv venv
+venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python main.py
+python chat.py
 ```
