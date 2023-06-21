@@ -1,20 +1,20 @@
 import json
 import openai
 import function_calling
-import time
 
-class ChatClient:
-    def __init__(self, api_key, model, functions, system_prompt=None):
+class ChatClientAzure:
+    def __init__(self, api_key, api_base, engine, system_prompt=None):
         """
         チャットクライアントを初期化する
         """
         self.api_key = api_key
         self.past_messages = []
-        self.model = model
-        self.functions = functions
+        self.engine = engine
         if system_prompt is not None:
             self.past_messages.append({"role": "system", "content": system_prompt})
-        openai.api_key = self.api_key
+        openai.api_key = api_key
+        openai.api_type = "azure"
+        openai.api_base = api_base
         openai.api_version = "2023-03-15-preview"
 
     def chat(self, message):
@@ -25,9 +25,9 @@ class ChatClient:
 
         # send prompt
         response = openai.ChatCompletion.create(
-            model=self.model,
+            engine=self.engine,
             messages=self.past_messages,
-            #temperature=1,
+            temperature=0.5,
             #top_p=1,
         )
 
@@ -39,7 +39,6 @@ class ChatClient:
 
     def chat_stream(self, message):
         """
-        not working
         メッセージを送信し、AIからの返答とトークン数を返す
         メッセージはストリームで返される、空文字列が返されたら終了
         トークン数は常に0を返す。(responseにtotal_tokensが含まれないため)
@@ -49,9 +48,9 @@ class ChatClient:
         # send prompt
         chunked_message = []
         for chunk in openai.ChatCompletion.create(
-            model=self.model,
+            engine=self.engine,
             messages=self.past_messages,
-            temperature=1,
+            temperature=0.5,
             #top_p=1,
             stream=True,
         ):
@@ -65,7 +64,7 @@ class ChatClient:
         self.past_messages.append({"role": "assistant", "content": "".join(chunked_message)})
         yield "", 0
 
-    def chat_with_function_call(self, message):
+    def chat_with_function_call(self, message, functions):
         """
         メッセージを送信し、AIからの返答とトークン数を返す
         function_callを使用する
@@ -74,22 +73,26 @@ class ChatClient:
 
         # send prompt
         response = openai.ChatCompletion.create(
-            model=self.model,
+            engine=self.engine,
             messages=self.past_messages,
-            functions=self.functions,
+            functions=functions,
             function_call="auto",
-            #temperature=1,
-            #top_p=1,
+            temperature=1
         )
 
         message = response["choices"][0]["message"]
 
+        # AIがfunction_calliingが必要と判断した場合、レスポンスにfunction_callが含まれる
         if message.get("function_call"):
+            # function_callしたい関数の情報を取得
             func_name = message["function_call"]["name"]
             arguments = json.loads(message["function_call"]["arguments"])
+
+            # 指定した関数を実行する
             func = getattr(function_calling, func_name)
             function_response = func(arguments.get("item"))
 
+            # 関数の実行結果をAIに返す
             self.past_messages.append({
                 "role": "function",
                 "name": func_name,
@@ -101,6 +104,7 @@ class ChatClient:
                 messages=self.past_messages,
             )
 
+            # AIの返答とトークン数を返す
             answer = second_answer.choices[0].message["content"]
             total_tokens = second_answer.usage["total_tokens"]
 
