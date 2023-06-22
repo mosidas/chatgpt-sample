@@ -15,7 +15,6 @@ class ChatClient:
         if system_prompt is not None:
             self.past_messages.append({"role": "system", "content": system_prompt})
         openai.api_key = self.api_key
-        openai.api_version = "2023-03-15-preview"
 
     def chat(self, message):
         """
@@ -39,7 +38,6 @@ class ChatClient:
 
     def chat_stream(self, message):
         """
-        not working
         メッセージを送信し、AIからの返答とトークン数を返す
         メッセージはストリームで返される、空文字列が返されたら終了
         トークン数は常に0を返す。(responseにtotal_tokensが含まれないため)
@@ -47,17 +45,19 @@ class ChatClient:
         self.past_messages.append({"role": "user", "content": message})
 
         # send prompt
-        chunked_message = []
-        for chunk in openai.ChatCompletion.create(
+        response = openai.ChatCompletion.create(
             model=self.model,
             messages=self.past_messages,
-            temperature=1,
+            temperature=0.5,
             #top_p=1,
             stream=True,
-        ):
+        )
+
+        chunked_message = []
+        for chunk in response:
             message = chunk['choices'][0]['delta'].get('content')
             if(message == None):
-                continue
+                pass
             else:
                 chunked_message.append(message)
                 yield message, 0

@@ -46,17 +46,19 @@ class ChatClientAzure:
         self.past_messages.append({"role": "user", "content": message})
 
         # send prompt
-        chunked_message = []
-        for chunk in openai.ChatCompletion.create(
+        response = openai.ChatCompletion.create(
             engine=self.engine,
             messages=self.past_messages,
             temperature=0.5,
             #top_p=1,
             stream=True,
-        ):
+        )
+
+        chunked_message = []
+        for chunk in response:
             message = chunk['choices'][0]['delta'].get('content')
             if(message == None):
-                continue
+                pass
             else:
                 chunked_message.append(message)
                 yield message, 0
@@ -116,16 +118,4 @@ class ChatClientAzure:
             self.past_messages.append({"role": "assistant", "content": answer})
 
             return answer, total_tokens
-
-    def stream_chat():
-        chat = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Who won the world series in 2020?"},
-            ],
-            stream=True,
-        )
-        for response in chat:
-            yield response['choices'][0]['message']['token']
 
