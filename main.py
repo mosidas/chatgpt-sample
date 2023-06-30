@@ -4,18 +4,19 @@ from ChatClientAzure import ChatClientAzure
 import function_calling
 import time
 import gpt_token
+import data_sources
 
 def main():
     # api key setting from environment variable
-    api_key = os.environ["OPENAI_API_KEY"]
+    # api_key = os.environ["OPENAI_API_KEY"]
     # create chat client
-    client = ChatClient(api_key,"gpt-3.5-turbo-0613",function_calling.functions)
-    # # setting from environment variable
-    # api_key = os.environ["AZURE_OPENAI_API_KEY"]
-    # api_base = os.environ["AZURE_OPENAI_API_BASE"]
-    # model = os.environ["AZURE_OPENAI_MODEL"]
-    # # create chat client
-    # client = ChatClientAzure(api_key, api_base, model)
+    # client = ChatClient(api_key,"gpt-3.5-turbo-0613",function_calling.functions)
+    # setting from environment variable
+    api_key = os.environ["AZURE_OPENAI_API_KEY"]
+    api_base = os.environ["AZURE_OPENAI_API_BASE"]
+    model = os.environ["AZURE_OPENAI_MODEL"]
+    # create chat client
+    client = ChatClientAzure(api_key, api_base, model)
     estimated_message_tokens = []
     estimated_answer_tokens = []
     while True:
@@ -29,21 +30,22 @@ def main():
 
         # send message
         # answer, tokens = client.chat(message)
+        answer, tokens = client.chat_on_your_data(message, data_sources.src)
         # send message with function calling
-        # answer, tokens = client.send_prompt_with_function_call(message,function_calling.functions)
-        # estimated_answer_tokens.append(gpt_token.count_tokens_gpt35(answer))
-        # print("AI: " + answer)
+        # answer, tokens = client.chat_with_function_call(message)
+        estimated_answer_tokens.append(gpt_token.count_tokens_gpt35(answer))
+        print("AI: " + answer)
         # send message with stream
-        print("AI: ", end='', flush=True)
-        answers = []
-        for answer, tokens in client.chat_stream(message):
-            if answer == "":
-                break
-            print(answer, end='', flush=True)
-            answers.append(answer)
-            time.sleep(0.05)
-        print('')
-        estimated_answer_tokens.append(gpt_token.count_tokens_gpt35("".join(answers)))
+        # print("AI: ", end='', flush=True)
+        # answers = []
+        # for answer, tokens in client.chat_stream(message):
+        #     if answer == "":
+        #         break
+        #     print(answer, end='', flush=True)
+        #     answers.append(answer)
+        #     time.sleep(0.05)
+        # print('')
+        # estimated_answer_tokens.append(gpt_token.count_tokens_gpt35("".join(answers)))
 
         print('---')
         print("sys: Estimated message tokens: " + str(estimated_message_tokens[-1]))

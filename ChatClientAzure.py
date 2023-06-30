@@ -15,7 +15,7 @@ class ChatClientAzure:
         openai.api_key = api_key
         openai.api_type = "azure"
         openai.api_base = api_base
-        openai.api_version = "2023-03-15-preview"
+        openai.api_version = "2023-06-01-preview"
 
     def chat(self, message):
         """
@@ -29,6 +29,24 @@ class ChatClientAzure:
             messages=self.past_messages,
             temperature=0.5,
             #top_p=1,
+        )
+
+        answer = response.choices[0].message["content"]
+        tokens = response.usage["total_tokens"]
+        self.past_messages.append({"role": "assistant", "content": answer})
+
+        return answer, tokens
+
+    def chat_on_your_data(self, message, data_sources):
+        self.past_messages.append({"role": "user", "content": message})
+
+        # send prompt
+        response = openai.ChatCompletion.create(
+            engine=self.engine,
+            messages=self.past_messages,
+            temperature=0.5,
+            #top_p=1,
+            dataSources=data_sources
         )
 
         answer = response.choices[0].message["content"]

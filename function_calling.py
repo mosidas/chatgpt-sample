@@ -13,7 +13,7 @@ functions =[
             "required": ["item"],
         },
     },
-     {
+    {
         "name": "get_jiros_profile",
         "description": "次郎さんの情報を得る。次郎さんの情報の項目は英語で設定されている。",
         "parameters": {
