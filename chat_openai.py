@@ -61,17 +61,14 @@ def chat_function_calling():
             answer, tokens = client.chat_with_function_call(message)
             estimated_answer_tokens.append(gpt_token.count_tokens_gpt35(answer))
             print("AI: " + answer)
+            print_estimated_tokens()
+            # if total tokens over 4000, break
+            if tokens > 4000:
+                print("sys: Total token over 4000. Good bye.")
+                break
         except Exception as e:
-            err_code, err_message = e.args
-            client.remove_last_message()
-            print("sys: " + err_message + " (" + err_code + ")")
+                print("sys: " + str(e))
 
-        print_estimated_tokens()
-
-        # if total tokens over 4000, break
-        if tokens > 4000:
-            print("sys: Total token over 4000. Good bye.")
-            break
 
 def chat_stream():
     while True:
