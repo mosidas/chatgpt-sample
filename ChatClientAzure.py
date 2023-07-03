@@ -3,7 +3,7 @@ import openai
 import function_calling
 
 class ChatClientAzure:
-    def __init__(self, api_key, api_base, engine, system_prompt=None):
+    def __init__(self, api_key, api_base, engine, api_version, system_prompt=None):
         """
         チャットクライアントを初期化する
         """
@@ -15,7 +15,7 @@ class ChatClientAzure:
         openai.api_key = api_key
         openai.api_type = "azure"
         openai.api_base = api_base
-        openai.api_version = "2023-06-01-preview"
+        openai.api_version = api_version
 
     def chat(self, message):
         """
@@ -74,12 +74,15 @@ class ChatClientAzure:
 
         chunked_message = []
         for chunk in response:
-            message = chunk['choices'][0]['delta'].get('content')
-            if(message == None):
+            if(len(chunk['choices']) == 0):
                 pass
             else:
-                chunked_message.append(message)
-                yield message, 0
+                message = chunk['choices'][0]['delta'].get('content')
+                if(message == None):
+                    pass
+                else:
+                    chunked_message.append(message)
+                    yield message, 0
 
         self.past_messages.append({"role": "assistant", "content": "".join(chunked_message)})
         yield "", 0

@@ -55,12 +55,12 @@ class ChatClient:
 
         chunked_message = []
         for chunk in response:
-            message = chunk['choices'][0]['delta'].get('content')
-            if(message == None):
-                pass
-            else:
+            if("content" in chunk['choices'][0]['delta']):
+                message = chunk['choices'][0]['delta'].get('content')
                 chunked_message.append(message)
                 yield message, 0
+            else:
+                pass
 
         self.past_messages.append({"role": "assistant", "content": "".join(chunked_message)})
         yield "", 0
@@ -112,16 +112,4 @@ class ChatClient:
             self.past_messages.append({"role": "assistant", "content": answer})
 
             return answer, total_tokens
-
-    def stream_chat():
-        chat = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Who won the world series in 2020?"},
-            ],
-            stream=True,
-        )
-        for response in chat:
-            yield response['choices'][0]['message']['token']
 
