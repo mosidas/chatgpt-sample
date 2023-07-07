@@ -10,16 +10,22 @@ estimated_message_tokens = []
 estimated_answer_tokens = []
 system_prompt = "あなたはAIアシスタントです。"
 
+
 def print_estimated_tokens():
-    print('---')
+    print("---")
     print("sys: Estimated message tokens: " + str(estimated_message_tokens[-1]))
     print("sys: Estimated answer tokens : " + str(estimated_answer_tokens[-1]))
-    print("sys: Estimated total tokens  : " + str(sum(estimated_answer_tokens) + sum(estimated_message_tokens)))
-    print('---')
+    print(
+        "sys: Estimated total tokens  : "
+        + str(sum(estimated_answer_tokens) + sum(estimated_message_tokens))
+    )
+    print("---")
+
 
 def chat():
     while True:
-        client = ChatClient(api_key, "gpt-3.5-turbo-0613", function_calling.functions, system_prompt)
+        # client = ChatClient(api_key, "gpt-3.5-turbo-0613", function_calling.functions, system_prompt)
+        client = ChatClient(api_key, "gpt-4", function_calling.functions, system_prompt)
         # get message
         message = input("Me: ")
         estimated_message_tokens.append(gpt_token.count_tokens_gpt35(message))
@@ -45,9 +51,12 @@ def chat():
             print("sys: Total token over 4000. Good bye.")
             break
 
+
 def chat_function_calling():
     while True:
-        client = ChatClient(api_key, "gpt-3.5-turbo-0613", function_calling.functions, system_prompt)
+        client = ChatClient(
+            api_key, "gpt-3.5-turbo-0613", function_calling.functions, system_prompt
+        )
         # get message
         message = input("Me: ")
         estimated_message_tokens.append(gpt_token.count_tokens_gpt35(message))
@@ -67,12 +76,14 @@ def chat_function_calling():
                 print("sys: Total token over 4000. Good bye.")
                 break
         except Exception as e:
-                print("sys: " + str(e))
+            print("sys: " + str(e))
 
 
 def chat_stream():
     while True:
-        client = ChatClient(api_key, "gpt-3.5-turbo-0613", function_calling.functions, system_prompt)
+        client = ChatClient(
+            api_key, "gpt-3.5-turbo-0613", function_calling.functions, system_prompt
+        )
         # get message
         message = input("Me: ")
         estimated_message_tokens.append(gpt_token.count_tokens_gpt35(message))
@@ -83,14 +94,16 @@ def chat_stream():
 
         try:
             # send message with stream
-            print("AI: ", end='', flush=True)
+            print("AI: ", end="", flush=True)
             answers = []
             for answer, tokens in client.chat_stream(message):
-                print(answer, end='', flush=True)
+                print(answer, end="", flush=True)
                 answers.append(answer)
                 time.sleep(0.05)
-            print('')
-            estimated_answer_tokens.append(gpt_token.count_tokens_gpt35("".join(answers)))
+            print("")
+            estimated_answer_tokens.append(
+                gpt_token.count_tokens_gpt35("".join(answers))
+            )
         except Exception as e:
             if len(e.args) == 2:
                 err_code, err_message = e.args

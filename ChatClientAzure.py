@@ -10,12 +10,22 @@ class ChatClientAzure:
         self.api_key = api_key
         self.past_messages = []
         self.engine = engine
+        self.system_prompt = system_prompt
         if system_prompt is not None:
             self.past_messages.append({"role": "system", "content": system_prompt})
         openai.api_key = api_key
         openai.api_type = "azure"
         openai.api_base = api_base
         openai.api_version = api_version
+
+    def reset(self):
+        """
+        メッセージ履歴をリセットする
+        """
+        self.past_messages = []
+        if self.system_prompt is not None:
+            self.past_messages.append({"role": "system", "content": self.system_prompt})
+
 
     def chat(self, message):
         """

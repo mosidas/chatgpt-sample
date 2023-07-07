@@ -10,7 +10,8 @@ model = os.environ["AZURE_OPENAI_MODEL"]
 
 estimated_message_tokens = []
 estimated_answer_tokens = []
-system_prompt = "あなたはAIアシスタントです。"
+# system_prompt = "あなたはAIアシスタントです。"
+system_prompt = None
 
 def print_estimated_tokens():
     print('---')

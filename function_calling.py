@@ -1,6 +1,7 @@
 import requests
 import urllib.parse
 import json
+import os
 
 # functions =[
 #     {
@@ -56,10 +57,9 @@ functions =[
 
 
 def get_profiles(item, skip=0, top=5):
-    encoded_item = urllib.parse.quote(item)
-    url = "https:/xxx"
+    url = os.environ["AZURE_GET_PROFILES_API_URL"]
     headers = {
-        "api-key":"xxx",
+        "api-key":os.environ["AZURE_GET_PROFILES_API_KEY"],
         "Content-Type":"application/json;charset=utf-8"}
 
     body = {
